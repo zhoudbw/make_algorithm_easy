@@ -99,6 +99,7 @@ nums1 中的所有整数同样出现在 nums2 中
 - 1 ，用加粗斜体标识，nums2 = [1,3,4,2]。下一个更大元素是 3 。
 - 2 ，用加粗斜体标识，nums2 = [1,3,4,2]。不存在下一个更大元素，所以答案是 -1 。
 ---
+
 清楚理解题意,确定需要返回的到底是什么;
 本题ans[i]返回的是下一个更大元素,而不是下一个更大元素的下标;
 
@@ -184,3 +185,114 @@ class Solution(object):
 
         return ans
 ```
+
+
+## [接雨水](https://leetcode.cn/problems/trapping-rain-water/description/)
+
+给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+
+```
+提示
+n == height.length
+1 <= n <= 2 * pow( 10, 4 )
+0 <= height[i] <= pow( 10, 5 )
+```
+
+### 题解
+
+![trapping-rain-water-eg.png](Assets/trapping-rain-water-eg.png)
+```
+示例
+输入：height = [0,1,0,2,1,0,1,3,2,1,2,1]
+输出：6
+解释：上面是由数组 [0,1,0,2,1,0,1,3,2,1,2,1] 表示的高度图，在这种情况下，可以接 6 个单位的雨水（蓝色部分表示雨水）。
+```
+
+#### 直观解法
+```python
+class Solution(object):
+    def trap(self, height):
+        """
+        :type height: List[int]
+        :rtype: int
+        """
+
+        # -- 当前能容纳的水量:min( 左边最长的柱子，右边最长的柱子 ) - 当前柱子长度
+
+        n = len( height )
+
+        lMaxs = [ height[ 0 ] for _ in range( n ) ]
+        rMaxs = [ height[ n - 1 ] for _ in range( n ) ]
+
+        for i in range( 1, n - 1 ):
+            lMaxs[ i ] = max( lMaxs[ i - 1 ], height[ i ] )
+
+        for i in range( n - 2, 0, -1 ):
+            rMaxs[ i ] = max( rMaxs[ i + 1 ], height[ i ] )
+        
+        ans = 0
+        for i in range( 1, n - 1 ):
+            ans += min( lMaxs[ i ], rMaxs[ i ] ) - height[ i ]
+        
+        return ans
+```
+
+#### 单调栈解法
+
+单调栈就是保持栈内元素有序。和栈与队列, 单调队列一样，需要我们自己维持顺序，没有现成的容器可以用。
+
+通常是一维数组，要寻找任一个元素的右边或者左边第一个比自己大或者小的元素的位置，此时我们就要想到可以用单调栈了。
+
+本题，正需要寻找一个元素，右边最大元素以及左边最大元素，来计算雨水面积。
+
+![trapping-rain-water-eg.png](Assets/trapping-rain-water-eg.png)
+
+**1. 单调栈内元素维持什么样的单调性?** 
+- 从栈头到栈底应维持从小到大的顺序, 这样主要是是为了出现凹槽.
+- 由于栈头到栈底是是从小到大的顺序, 当此时height[i] > 栈头元素, 此时栈头元素左边第一个即凹槽的左边界, height[i]为凹槽的右边界,可计算该凹槽水量.
+
+2. 处理情况:
+- height[i] < 栈头元素: height[i]直接入栈;
+- height[i] = 栈头元素: pop栈头元素,height[i]入栈( 由于height[i] = 栈头元素,更新栈头元素,相当于更新凹槽宽度 );
+- height[i] > 栈头元素: 出现凹槽,计算凹槽水量,没有凹槽后height[i]入栈;
+
+3. 模拟: 输入：height = [0,1,0,2,1,0,1,3,2,1,2,1]
+```
+stk: 0;
+height[i] = 1:pop栈头元素0,凹槽无左边界,height[i]直接入栈; stk: 1
+height[i] = 0:入栈; stk = 1, 0
+height[i] = 2:pop栈头元素0,凹槽左边界1,凹槽右边界height[i], 水量1; 继续判断; stk: 2
+..
+```
+
+**4. 明确单调栈中存储的是什么? 存储数组下标,需要高度是通过height[i]取.**
+
+```python
+class Solution(object):
+    def trap(self, height):
+        """
+        :type height: List[int]
+        :rtype: int
+        """
+
+        n = len( height )
+
+        stk = [ 0 ]
+
+        ans = 0
+
+        for i in range( 1, n ):
+            if height[ i ] < height[ stk[ -1 ] ]: stk.append( i )
+            elif height[ i ] == height[ stk[ -1 ] ]: stk.pop(); stk.append( i )
+            else:
+                while stk and height[ i ] >= height[ stk[ -1 ] ]:
+                    mid = stk.pop()
+                    if stk:
+                        w = i - stk[ -1 ] - 1
+                        h = min( height[ i ], height[ stk[ -1 ] ] ) - height[ mid ]
+                        ans += w * h
+                stk.append( i )
+
+        return ans
+```
+
