@@ -296,3 +296,155 @@ class Solution(object):
         return ans
 ```
 
+
+## [柱状图中最大的矩形](https://leetcode.cn/problems/largest-rectangle-in-histogram/description/)
+
+给定 n 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。
+
+求在该柱状图中，能够勾勒出来的矩形的最大面积。
+
+```
+提示：
+1 <= heights.length <= pow( 10, 5 )
+0 <= heights[i] <= pow( 10, 4 )
+```
+
+![img.png](Assets/largest-rectangle-in-histogram-eg01.png)
+```
+示例1
+输入：heights = [2,1,5,6,2,3]
+输出：10
+解释：最大的矩形为图中红色区域，面积为 10
+```
+
+![img.png](Assets/largest-rectangle-in-histogram-eg02.png)
+```
+示例2
+输入： heights = [2,4]
+输出： 4
+```
+
+### 题解
+
+**暴力解法**
+
+- 从一个柱状体出发, 向左右两边扩展, 直到遇到比它矮的柱状体, 计算当前柱状体的面积, 取最大值.
+
+- 时间复杂度为O(n^2), 会超时. 空间复杂度为O(1).
+
+- 没有更好的解法,抢分的话,可以考虑使用,毕竟能够通过的测试用例数: 87 / 99 个通过的测试用例
+
+```python
+class Solution(object):
+    def largestRectangleArea(self, heights):
+        """
+        :type heights: List[int]
+        :rtype: int
+        """
+        n = len( heights )
+
+        ans = 0
+
+        for i in range( 0, n ):
+            left, right = i, i
+
+            while left >= 0 and heights[ left ] >= heights[ i ]: left -= 1
+            while right < n and heights[ right ] >= heights[ i ]: right += 1
+
+            ans = max( ans, ( right - left - 1 ) * heights[ i ] )
+        
+        return ans
+```
+
+**双指针优化**
+
+- 上述暴力算法中,以height[i]为基点,向左右两边扩展,寻找第一个比height[i]小的柱状体, 计算当前柱状体的面积, 取最大值.
+
+- 可以使用双指针优化, 记录下每个柱状体的左边第一个比它矮的柱状体的下标, 右边第一个比它矮的柱状体的下标. 计算当前柱状体的面积, 取最大值.
+
+- 时间复杂度为O(n) 实际上,高于O(n), 空间复杂度为O(n).
+
+- **代码细节很多:**
+  1. 初始化时, 左边第一个比它矮的柱状体的下标为-1, 右边第一个比它矮的柱状体的下标为n.
+  2. 计算当前柱状体的面积时, 宽度为 min_r[ i ] - min_l[ i ] - 1, 高度为heights[ i ].
+  3. 计算过程中,下标的更新的方式,要注意.
+
+```python
+class Solution(object):
+    def largestRectangleArea(self, heights):
+        """
+        :type heights: List[int]
+        :rtype: int
+        """
+
+        n = len( heights )
+
+        min_l = [ -1 for _ in range( n ) ]
+        min_r = [ -1 for _ in range( n ) ]
+
+        # -- 注意初始化，防止死循环 --
+        min_l[ 0 ] = -1
+        for i in range( 1, n ):
+            t = i - 1
+            # -- 对t的更新, 优化height[ t ] >= height[ i ],
+            # -- 所以height[ t ]左边第一个更小的柱子下标，一定height[ i ]左边更小柱子下标
+            while t >= 0 and heights[ t ] >= heights[ i ]: t = min_l[ t ]
+            min_l[ i ] = t
+        
+        min_r[ n -1 ] = n
+        for i in range( n - 2, -1, -1 ):
+            t = i + 1
+            while t < n and heights[ t ] >= heights[ i ]: t = min_r[ t ]
+            min_r[ i ] = t
+
+        ans = 0
+        for i in range( n ):
+            ans = max( ans, ( min_r[ i ] - min_l[ i ] - 1 ) * heights[ i ] )
+
+        return ans
+```
+
+**单调栈**
+
+- 和接雨水问题对比:
+  1. 接雨水问题中, 是找到柱子的左右两边第一个比它高的柱子.
+  2. 柱状图中最大的矩形问题中, 是找到柱子的左右两边第一个比它矮的柱子.
+
+- 利用单调栈:
+  1. 从栈头到栈尾,栈中元素单调递减.
+  2. 栈存储的元素, 是柱子的下标.
+  3. 维持栈中元素是单调递减的;这样当遇到比栈顶柱子矮的柱子时,弹出栈顶柱子,取左右边界,计算面积,取最大值.
+  4. 特殊的,元素全部入栈结束后,如果栈内不为空,此时由于栈内元素具有单调性,计算扩展出来的面积,取最大值. ( 为了规避特殊处理,方便统一处理:在heights头尾插入0. )
+  
+  5. 单调栈的写法,很值得琢磨, 尤其在于heights首尾增加0的操作,很值得推敲.
+
+```python
+class Solution(object):
+    def largestRectangleArea(self, heights):
+        """
+        :type heights: List[int]
+        :rtype: int
+        """
+
+        # -- 为了统一处理:在heights头尾插入0 --
+        heights.insert( 0, 0 )
+        heights.append( 0 )
+
+        mono_stk = [ 0 ]
+
+        n = len( heights )
+
+        ans = 0
+
+        for i in range( 1, n ):
+            if heights[ i ] > heights[ mono_stk[ -1 ] ]: mono_stk.append( i )
+            elif heights[ i ] == heights[ mono_stk[ -1 ] ]: mono_stk.pop(); mono_stk.append( i )
+            else:
+                while mono_stk and heights[ mono_stk[ -1 ] ] > heights[ i ]:
+                    mid = mono_stk.pop()
+                    # -- 由于末尾增加了0,无需单独考虑 mid单独拓展成的矩形
+                    if mono_stk:
+                        ans = max( ans, ( i - mono_stk[ -1 ] - 1 ) * heights[ mid ] )
+                mono_stk.append( i )
+        return ans
+```
