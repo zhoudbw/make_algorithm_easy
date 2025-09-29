@@ -118,3 +118,101 @@ class Solution(object):
 
         return ans
 ```
+
+## [K次取反后最大化的数组和](https://leetcode.cn/problems/maximize-sum-of-array-after-k-negations/description/)
+
+给你一个整数数组 nums 和一个整数 k ，按以下方法修改该数组：
+
+- 选择某个下标 i 并将 nums[i] 替换为 -nums[i] 。
+- 重复这个过程恰好 k 次。可以多次选择同一个下标 i 。
+
+以这种方式修改数组后，返回数组 可能的最大和 。
+
+```
+提示：
+1 <= nums.length <= pow( 10, 4 )
+-100 <= nums[i] <= 100
+1 <= k <= pow( 10, 4 )
+```
+
+### 题解
+
+```
+示例 1：
+输入：nums = [4,2,3], k = 1
+输出：5
+解释：选择下标 1 ，nums 变为 [4,-2,3] 。
+
+示例 2：
+输入：nums = [3,-1,0,2], k = 3
+输出：6
+解释：选择下标 (1, 2, 2) ，nums 变为 [3,1,0,2] 。
+
+示例 3：
+输入：nums = [2,-3,-1,5,-4], k = 2
+输出：13
+解释：选择下标 (1, 4) ，nums 变为 [2,3,-1,5,4] 。
+```
+
+**代码详解**
+
+- 贪心思想解释
+  - 每次都选择最小的负数,将其翻转;
+  - 如果还剩翻转次数, 取其中的最小值,用来抵消其他翻转次数.
+
+- 代码细节
+  - 由于nums是经过排序的,所以最大的就是nums[ n-1 ],将其设置为初始值,用来更新min_index
+  - 由于nums是经过排序的,所以如果反转到非负数区域,最小值为第一个非负数,所以可以只判断第一个非负数是否是更小的;
+  - 负数全部翻转了,如果还剩下翻转次数,一定选择最小数,才能使的和最大.
+
+```python
+class Solution(object):
+  def largestSumAfterKNegations(self, nums, k):
+    """
+    :type nums: List[int]
+    :type k: int
+    :rtype: int
+    """
+
+    # -- 排序,从小到大,将负数翻转,如果还剩翻转次数,
+    # 取其中的最小值,用来翻转其他次数 --
+
+    def qsort( left, right ):
+      if left >= right: return
+
+      pivot = nums[ left + ( right - left ) // 2 ]
+
+      i, j = left - 1, right + 1
+
+      while i < j:
+        i += 1
+        while nums[ i ] < pivot: i += 1
+
+        j -= 1
+        while nums[ j ] > pivot: j -= 1
+
+        if i < j: nums[ i ], nums[ j ] = nums[ j ], nums[ i ]
+
+      qsort( left, j )
+      qsort( j + 1, right )
+
+    n = len( nums )
+    qsort( 0, n - 1 )
+
+    reverse_count = 0
+    min_index = n - 1
+
+    for i in range( n ):
+      if reverse_count >= k: break
+      if nums[ i ] >= 0:
+        if nums[ i ] < nums[ min_index ]: min_index = i
+        break
+      nums[ i ] = -nums[ i ]
+      reverse_count += 1
+      if nums[ i ] < nums[ min_index ]: min_index = i
+
+    if reverse_count < k: nums[ min_index ] = pow( -1, k - reverse_count ) * nums[ min_index ]
+
+
+    return sum( nums )
+```
