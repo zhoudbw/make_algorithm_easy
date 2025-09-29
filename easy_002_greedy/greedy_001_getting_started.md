@@ -157,6 +157,7 @@ class Solution(object):
 **代码详解**
 
 - 贪心思想解释
+> 一定要用贪心的思想去思考,即局部最优->全局最优
   - 每次都选择最小的负数,将其翻转;
   - 如果还剩翻转次数, 取其中的最小值,用来抵消其他翻转次数.
 
@@ -174,22 +175,21 @@ class Solution(object):
     :rtype: int
     """
 
-    # -- 排序,从小到大,将负数翻转,如果还剩翻转次数,
-    # 取其中的最小值,用来翻转其他次数 --
+    # -- 排序,从小到大,将负数翻转,如果还剩翻转次数,取其中的最小值,用来翻转其他次数 --
 
     def qsort( left, right ):
       if left >= right: return
 
-      pivot = nums[ left + ( right - left ) // 2 ]
+      pivot = abs( nums[ left + ( right - left ) // 2 ] )
 
       i, j = left - 1, right + 1
 
       while i < j:
         i += 1
-        while nums[ i ] < pivot: i += 1
+        while abs( nums[ i ] ) < pivot: i += 1
 
         j -= 1
-        while nums[ j ] > pivot: j -= 1
+        while abs( nums[ j ] ) > pivot: j -= 1
 
         if i < j: nums[ i ], nums[ j ] = nums[ j ], nums[ i ]
 
@@ -199,20 +199,12 @@ class Solution(object):
     n = len( nums )
     qsort( 0, n - 1 )
 
-    reverse_count = 0
-    min_index = n - 1
 
-    for i in range( n ):
-      if reverse_count >= k: break
-      if nums[ i ] >= 0:
-        if nums[ i ] < nums[ min_index ]: min_index = i
-        break
-      nums[ i ] = -nums[ i ]
-      reverse_count += 1
-      if nums[ i ] < nums[ min_index ]: min_index = i
+    # -- 此时,数组按照绝对值从大到小排序完成 --
+    for i in range( n - 1, -1, -1 ):
+      if k > 0 and nums[ i ] < 0: nums[ i ] *= -1; k -= 1
 
-    if reverse_count < k: nums[ min_index ] = pow( -1, k - reverse_count ) * nums[ min_index ]
-
+    if k > 0: nums[ 0 ] *= pow( -1, k )
 
     return sum( nums )
 ```
