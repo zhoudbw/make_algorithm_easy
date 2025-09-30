@@ -4,9 +4,9 @@
 ## 大纲
 
 - 贪心算法详解
-- 题目:分发饼干 
-- 题目:K次取反后最大化的数组和
-- 题目:柠檬水找零
+- 题目: [分发饼干](https://leetcode.cn/problems/assign-cookies/description/)
+- 题目: [K次取反后最大化的数组和](https://leetcode.cn/problems/maximize-sum-of-array-after-k-negations/description/)
+- 题目: [柠檬水找零](https://leetcode.cn/problems/lemonade-change/description/)
 
 ## 详解
 
