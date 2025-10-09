@@ -52,7 +52,9 @@
 
 #### 贪心算法
 
-局部最优：删除单调坡度上的节点（不包括单调坡度两端的节点），那么这个坡度就可以有两个局部峰值。
+局部最优：删除单调坡度上的节点, 那么这个坡度就可以有两个局部峰值。
+- 如果是单调增或单调减,保留左右两端点;
+- 如果是单调不增或单调不减,保留左右两端点之一;
 
 整体最优：整个序列有最多的局部峰值，从而达到最长摆动序列。
 
@@ -60,12 +62,42 @@
 
 **代码详解**
 
-实际操作上，其实连删除的操作都不用做，因为题目要求的是最长摆动子序列的长度，所以只需要统计数组的峰值数量就可以了（相当于是删除单一坡度上的节点，然后统计长度）
+实际操作上，其实连删除的操作都不用做，因为题目要求的是最长摆动子序列的长度，所以只需要统计数组的峰值数量即可.
+
+在计算是否有峰值的时候，计算 prediff（nums[i] - nums[i-1]） 和 curdiff（nums[i+1] - nums[i]），
+如果prediff < 0 && curdiff > 0 或者 prediff > 0 && curdiff < 0 此时就有波动就需要统计。
+
+这是思考本题的一个大体思路，但本题要考虑三种情况：
+
+- 情况一：上下坡中有平坡
+- 情况二：数组首尾两端
+- 情况三：单调坡中有平坡
 
 - 贪心思想解释
 
 ```python
+class Solution:
+    def wiggleMaxLength(self, nums: list[int]) -> int:
 
+        n = len( nums )
+
+        if n == 1: return 1
+
+        ans = 1 # 记录峰值个数,序列默认序列最右边有一个峰值
+
+        prediff = 0 # 前一对差值
+        curdiff = 0 # 当前一对差值
+
+        for i in range( 0, n - 1 ):
+            curdiff = nums[ i + 1 ] - nums[ i ]
+
+            if prediff >= 0 and curdiff < 0 or prediff <= 0 and curdiff > 0:
+                ans += 1
+
+                # 注意,只在摆动变化的时候更新prediff
+                prediff = curdiff
+                
+        return ans
 ```
 
 #### 动态规划
@@ -110,6 +142,17 @@ class Solution:
         
         return max( dp[ -1 ][ 0 ], dp[ -1 ][ 1 ] )
 ```
+
+**进阶**
+
+可以用两棵线段树来维护区间的最大值
+
+每次更新dp[i][0]，则在tree1的nums[i]位置值更新为dp[i][0]
+
+每次更新dp[i][1]，则在tree2的nums[i]位置值更新为dp[i][1]
+
+则 dp 转移方程中就没有必要 j 从 0 遍历到 i-1，可以直接在线段树中查询指定区间的值即可。
+
 
 ## [最大子数组和](https://leetcode.cn/problems/maximum-subarray/description/)
 
