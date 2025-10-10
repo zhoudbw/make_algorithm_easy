@@ -73,8 +73,6 @@
 - 情况二：数组首尾两端
 - 情况三：单调坡中有平坡
 
-- 贪心思想解释
-
 ```python
 class Solution:
     def wiggleMaxLength(self, nums: list[int]) -> int:
@@ -185,13 +183,93 @@ class Solution:
 输出：23
 ```
 
-**代码详解**
+#### 贪心算法
 
-- 贪心思想解释
+**贪心体现在哪里?**
+
+如果 -2 1 在一起，计算起点的时候，一定是从 1 开始计算，因为负数只会拉低总和，这就是贪心贪的地方！
+
+- 局部最优：当前“连续和”为负数的时候立刻放弃，从下一个元素重新计算“连续和”，因为负数加上下一个元素 “连续和”只会越来越小。
+- 全局最优：选取最大“连续和”
+
+局部最优的情况下，并记录最大的“连续和”，可以推出全局最优。
 
 ```python
+class Solution:
+    def maxSubArray(self, nums: list[int]) -> int:
 
+        ans = float( '-inf' )
+
+        acc_sum = 0
+
+        for x in nums:
+
+            if acc_sum < 0:
+                acc_sum = x
+        
+            else:
+                acc_sum += x
+            
+            ans = max( ans, acc_sum )
+            
+        return ans
 ```
+
+
+#### 动态规划
+
+- dp[ i ] 表示到nums[ i ]的最大连续子数组和
+  - dp[i][0] 表示不加入nums[i]的最大连续子数组和
+  - dp[i][1] 表示要加入nums[i]的最大连续子数组和
+
+- dp[ i ]的状态转移方程 ( ans 记录出现过的最大连续子数组和 )
+  - dp[i][0] = max( dp[ i - 1 ][ 0 ], dp[ i - 1 ][ 1 ] ); ans = max( ans, dp[ i ][ 0 ] )
+  - dp[i][1] = max( nums[ i ], dp[ i - 1 ][ 1 ] + nums[ i ] ); ans = max( ans, dp[ i ][ 1 ] )
+
+- 初始化: 这里需要特别注意(  )
+  - dp[ 0 ][ 1 ] = dp[ 0 ][ 0 ] = nums[ 0 ]
+  - ans = nums[ 0 ] # 子数组长度必须大于1
+
+```python
+class Solution:
+    def maxSubArray(self, nums: list[int]) -> int:
+
+        n = len( nums )
+
+        dp = [ [ 0, 0 ] for _ in range( n ) ]
+
+        dp[ 0 ][ 1 ] = dp[ 0 ][ 0 ] = nums[ 0 ]
+        ans = nums[ 0 ] # 子数组长度必须大于1
+
+        for i in range( 1, n ):
+            dp[ i ][ 0 ] = max( dp[ i - 1 ][ 0 ], dp[ i - 1 ][ 1 ] )
+            dp[ i ][ 1 ] = max( nums[ i ], dp[ i - 1 ][ 1 ] + nums[ i ] )
+            ans = max( ans, dp[ i ][ 0 ], dp[ i ][ 1 ] )
+        
+        return ans
+```
+
+**注意:上面代码,其实不需要dp[i][0]这一项来记录**
+
+**因为,如果不选择nums[i],此时已经不是连续序列了,需要从nums[i]开始重新计数, 有ans记录过程中的最大值,所以dp[i][0]无需**
+
+```python
+class Solution:
+    def maxSubArray(self, nums: list[int]) -> int:
+
+        n = len( nums )
+
+        dp = [ 0 for _ in range( n ) ]
+
+        dp[ 0 ] = ans = nums[ 0 ]
+        
+        for i in range( 1, n ):
+            dp[ i ] = max( nums[ i ], dp[ i - 1 ] + nums[ i ] )
+            ans = max( ans, dp[ i ] )
+        
+        return ans
+```
+
 
 ## [买卖股票的最佳时机II](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii/description/)
 
