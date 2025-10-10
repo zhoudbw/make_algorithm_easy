@@ -414,10 +414,31 @@ class Solution:
 
 **代码详解**
 
+这段代码的想法简单: 就是可达下标是否能够覆盖到整个数组;
+
 - 贪心思想解释
 
-```python
+每次移动取最大跳跃步数（得到最大的覆盖范围），每移动一个单位，就更新最大覆盖范围。
 
+**贪心算法局部最优解：每次取最大跳跃步数（取最大覆盖范围），整体最优解：最后得到整体最大覆盖范围，看是否能到终点。**
+
+局部最优推出全局最优，找不出反例，试试贪心！
+
+
+
+```python
+class Solution:
+    def canJump(self, nums: list[int]) -> bool:
+
+        maxIndex = 0
+        curIndex = 0
+
+        while curIndex <= maxIndex:
+            maxIndex = max( maxIndex, curIndex + nums[ curIndex ] )
+            curIndex += 1
+            if maxIndex >= len( nums ) - 1: return True
+        
+        return False
 ```
 
 ## [跳跃游戏II](https://leetcode.cn/problems/jump-game-ii/description/)
