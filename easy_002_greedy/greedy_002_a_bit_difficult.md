@@ -307,12 +307,83 @@ class Solution:
 解释：在这种情况下, 交易无法获得正利润，所以不参与交易可以获得最大利润，最大利润为 0。
 ```
 
-**代码详解**
+#### 动态规划
 
-- 贪心思想解释
+**本题,dp的状态设置为第i天持有股票和不持有股票的最大利润**
+**这样规定比dp的状态设置为第i天卖出/买入/不处理股票的最大利润更容易处理**
+
+**在定义dp含义时,要充分考虑状态转移方程推导的便利性**
+
+- dp[ i ]表示第i天持有/不持有股票的最大利润
+  - dp[ i ][ 0 ]表示第i天不持有股票的最大利润
+  - dp[ i ][ 1 ]表示第i天持有股票的最大利润
+
+- 状态转移方程:
+  - dp[ i ][ 0 ] = max( dp[ i - 1 ][ 0 ], dp[ i - 1 ][ 1 ] + nums[ i ] ) # 前一天不持有;当天卖出;
+  - dp[ i ][ 1 ] = max( dp[ i - 1 ][ 1 ], dp[ i - 1 ][ 0 ] - nums[ i ] ) # 前一天不持有;当天买入;
+
+- 初始化:
+  - dp[ 0 ][ 0 ] = 0; dp[ 0 ][ 1 ] = -price[ 0 ]
+
+- 遍历顺序:
+  - for i in range( 1, n ) [prices] 即可
+
+- 模拟
 
 ```python
+class Solution:
+    def maxProfit(self, prices: list[int]) -> int:
+        
+        n = len( prices )
 
+        dp = [ [ 0, 0 ] for _ in range( n ) ]
+
+        dp[ 0 ][ 0 ] = 0; dp[ 0 ][ 1 ] = -prices[ 0 ]
+
+        for i in range( 1, n ):
+
+            dp[ i ][ 0 ] = max( dp[ i - 1 ][ 0 ], dp[ i - 1 ][ 1 ] + prices[ i ] )
+            dp[ i ][ 1 ] = max( dp[ i - 1 ][ 1 ], dp[ i - 1 ][ 0 ] - prices[ i ] )
+        
+        return max( dp[ -1 ][ 0 ], dp[ -1 ][ 1 ] )
+```
+
+#### 贪心算法
+
+这道题目很直观的想法, 选一个低的买入, 再选个高的卖 ... 循环反复。
+
+如果想到其实最终利润是可以分解的，那么本题就很容易了！
+
+**如何分解呢？**
+> 分解的依据在于:"在同一天多次买卖该股票"
+
+假如第 0 天买入，第 3 天卖出，那么利润为：prices[3] - prices[0]。
+
+相当于(prices[3] - prices[2]) + (prices[2] - prices[1]) + (prices[1] - prices[0])。
+
+此时就是把利润分解为每天为单位的维度，而不是从 0 天到第 3 天整体去考虑！
+
+那么根据 prices 可以得到每天的利润序列：(prices[i] - prices[i - 1]).....(prices[1] - prices[0])。
+
+注:第一天当然利润，至少要第二天才会有利润，所以利润的序列比股票序列少一天！
+
+**那么只收集正利润就是贪心所贪的地方！**
+
+局部最优：收集每天的正利润，全局最优：求得最大利润。
+
+局部最优可以推出全局最优，找不出反例，试一试贪心！
+
+```python
+class Solution:
+    def maxProfit(self, prices: list[int]) -> int:
+        
+        n = len( prices )
+        ans = 0
+
+        for i in range( 1, n ):
+            if prices[ i ] - prices[ i - 1 ] > 0:
+                ans += prices[ i ] - prices[ i - 1 ]
+        return ans
 ```
 
 ## [跳跃游戏](https://leetcode.cn/problems/jump-game/description/)
