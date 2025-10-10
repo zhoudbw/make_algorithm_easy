@@ -424,8 +424,6 @@ class Solution:
 
 局部最优推出全局最优，找不出反例，试试贪心！
 
-
-
 ```python
 class Solution:
     def canJump(self, nums: list[int]) -> bool:
@@ -473,10 +471,28 @@ class Solution:
 输出: 2
 ```
 
-**代码详解**
-
 - 贪心思想解释
 
-```python
+**可达区域内选择能够到达的最远的跳过去**
 
+```python
+class Solution:
+    def jump(self, nums: list[int]) -> int:
+        
+        maxIndex = 0
+        curIndex = 0
+        stepCount = 0
+
+        # -- 可达区域内选择能够到达的最远的跳过去 --
+        while maxIndex < len( nums ) - 1:
+
+            _maxIndex = maxIndex
+            while curIndex <= maxIndex:
+                _maxIndex = max( _maxIndex, curIndex + nums[ curIndex ] )
+                curIndex += 1
+            else:
+                maxIndex = _maxIndex
+                stepCount += 1
+
+        return stepCount
 ```
