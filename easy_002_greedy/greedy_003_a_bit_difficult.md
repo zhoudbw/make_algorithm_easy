@@ -92,6 +92,31 @@ class Solution:
         else: return -1
 ```
 
+--提供一种很棒的写法--
+* 已知,如果总油量大于等于总消耗，那么一定可以跑完一圈;
+* 所以不需要向上面代码一样去做累计判断是否最终剩余油量>=0;
+* 所以只需要判断在遍历过程中,curSum是否小于0即可;
+```c++
+class Solution {
+public:
+    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+        int curSum = 0;
+        int totalSum = 0;
+        int start = 0;
+        for (int i = 0; i < gas.size(); i++) {
+            curSum += gas[i] - cost[i];
+            totalSum += gas[i] - cost[i];
+            if (curSum < 0) {   // 当前累加rest[i]和 curSum一旦小于0
+                start = i + 1;  // 起始位置更新为i+1
+                curSum = 0;     // curSum从0开始
+            }
+        }
+        if (totalSum < 0) return -1; // 说明怎么走都不可能跑一圈了
+        return start;
+    }
+};
+```
+
 
 ## [分发糖果](https://leetcode.cn/problems/candy/description/)
 
