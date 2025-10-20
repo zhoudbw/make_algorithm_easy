@@ -101,3 +101,125 @@ class Solution:
 
 --优化--
 * 从上面代码其实可以看出来,每次都是在更新no_repeats[-1],所以可以用left,right,count来取代no_repeats.
+
+[无重叠区间](https://leetcode.cn/problems/non-overlapping-intervals/description/)
+
+给定一个区间的集合 intervals ，其中 intervals[i] = [starti, endi] 。返回 需要移除区间的最小数量，使剩余区间互不重叠 。
+
+注意 只在一点上接触的区间是 不重叠的。例如 [1, 2] 和 [2, 3] 是不重叠的。
+
+--提示--
+```
+1 <= intervals.length <= 10^5
+intervals[i].length == 2
+-5 * 10^4 <= starti < endi <= 5 * 10^4
+```
+
+--示例--
+```
+示例 1:
+输入: intervals = [[1,2],[2,3],[3,4],[1,3]]
+输出: 1
+解释: 移除 [1,3] 后，剩下的区间没有重叠。
+
+示例 2:
+输入: intervals = [ [1,2], [1,2], [1,2] ]
+输出: 2
+解释: 你需要移除两个 [1,2] 来使剩下的区间没有重叠。
+
+示例 3:
+输入: intervals = [ [1,2], [2,3] ]
+输出: 0
+解释: 你不需要移除任何区间，因为它们已经是无重叠的了。
+
+补充示例4:
+输入: intervals = [[0,2],[1,3],[2,4],[3,5],[4,6]]
+输出: 2
+```
+
+### 题解
+
+* 问题转换能力
+  * 题目类比: 射箭问题; 无重叠区间问题;
+
+```python
+class Solution:
+    def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
+        # 按照左边界排序,计算重叠区间数
+        # 注:如果A,B两区间重叠,更新右边界一定是min(Aright,Bright)
+        # 比如区间 [1,3],[1,2],[2,3]最小移除数量为1,区间更新就特别重要
+
+        n = len( intervals )
+
+        if n == 1: return 0
+
+        def qsort( low, high ):
+            if low >= high: return
+
+            pivot = intervals[ low + ( high - low ) // 2 ][ 0 ]
+
+            i = low - 1; j = high + 1
+            while i < j:
+                i += 1
+                while intervals[ i ][ 0 ] < pivot: i += 1
+                j -= 1
+                while intervals[ j ][ 0 ] > pivot: j -= 1
+                
+                if i < j: intervals[ i ], intervals[ j ] = intervals[ j ], intervals[ i ]
+            
+            qsort( low, j )
+            qsort( j + 1, high )
+        
+        qsort( 0, n - 1 )
+
+        left = intervals[ 0 ][ 0 ]; right = intervals[ 0 ][ 1 ]; overlapCount = 0
+
+        for i in range( 1, n ):
+            if left <= intervals[ i ][ 0 ] < right:
+                right = min( right, intervals[ i ][ 1 ] )
+                overlapCount += 1
+            else:
+                left = intervals[ i ][ 0 ]
+                right = intervals[ i ][ 1 ]
+
+        return overlapCount
+        
+```
+
+[划分字母区间](https://leetcode.cn/problems/partition-labels/description/)
+
+给你一个字符串 s 。我们要把这个字符串划分为尽可能多的片段，同一字母最多出现在一个片段中。
+
+例如，字符串 "ababcc" 能够被分为 ["abab", "cc"]，但类似 ["aba", "bcc"] 或 ["ab", "ab", "cc"] 的划分是非法的。
+
+注意，划分结果需要满足：将所有划分结果按顺序连接，得到的字符串仍然是 s 。
+
+返回一个表示每个字符串片段的长度的列表。
+
+--提示--
+```
+1 <= s.length <= 500
+s 仅由小写英文字母组成
+```
+
+--示例--
+```
+示例 1：
+输入：s = "ababcbacadefegdehijhklij"
+输出：[9,7,8]
+解释：
+划分结果为 "ababcbaca"、"defegde"、"hijhklij" 。
+每个字母最多出现在一个片段中。
+像 "ababcbacadefegde", "hijhklij" 这样的划分是错误的，因为划分的片段数较少。 
+
+示例 2：
+输入：s = "eccbbbbdec"
+输出：[10]
+```
+
+### 题解
+
+
+```python
+        
+```
