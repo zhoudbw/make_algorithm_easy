@@ -273,3 +273,76 @@ class Solution:
     for start, end in not_overlap: ans.append( end == -1 and 1 or end - start + 1 )
     return ans
 ```
+
+
+[合并区间](https://leetcode.cn/problems/merge-intervals/description/)
+
+以数组 intervals 表示若干个区间的集合，其中单个区间为 intervals[i] = [starti, endi] 。
+
+请你合并所有重叠的区间，并返回 一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间 。
+
+--提示--
+```
+1 <= intervals.length <= 10^4
+intervals[i].length == 2
+0 <= starti <= endi <= 10^4
+```
+
+--示例--
+```
+示例 1：
+输入：intervals = [[1,3],[2,6],[8,10],[15,18]]
+输出：[[1,6],[8,10],[15,18]]
+解释：区间 [1,3] 和 [2,6] 重叠, 将它们合并为 [1,6].
+
+示例 2：
+输入：intervals = [[1,4],[4,5]]
+输出：[[1,5]]
+解释：区间 [1,4] 和 [4,5] 可被视为重叠区间。
+
+示例 3：
+输入：intervals = [[4,7],[1,4]]
+输出：[[1,7]]
+解释：区间 [1,4] 和 [4,7] 可被视为重叠区间。
+```
+
+### 题解
+
+* 区间问题:条件反射就想想排序
+* 区间比较的条件,根据题目判断
+
+```python
+class Solution:
+  def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+
+    n = len( intervals )
+
+    def qsort( left, right ):
+      if left >= right: return
+
+      pivot = intervals[ left + ( right - left ) // 2 ][ 0 ]
+
+      i = left - 1; j = right + 1
+      while i < j:
+        i += 1
+        while intervals[ i ][ 0 ] < pivot: i += 1
+        j -= 1
+        while intervals[ j ][ 0 ] > pivot: j -= 1
+        if i < j:
+          intervals[ i ], intervals[ j ] = intervals[ j ], intervals[ i ]
+      qsort( left, j )
+      qsort( j + 1, right )
+
+    qsort( 0, n - 1 )
+
+    ans = []
+
+    for start, end in intervals:
+      if not ans: ans.append( [ start, end ] ); continue
+
+      if ans[ -1 ][ 0 ] <= start <= ans[ -1 ][ 1 ]:
+        ans[ -1 ][ 1 ] = max( ans[ -1 ][ 1 ], end )
+      else: ans.append( [ start, end ] )
+
+    return ans
+```
