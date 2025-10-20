@@ -219,7 +219,57 @@ s 仅由小写英文字母组成
 
 ### 题解
 
+* 本题的解决和前面区间的题目相同,只是最后统计的是不重叠区间的长度
+* **如果单独拎出来这道题,是否能够想到用区间的方法来解决?**
+
+* 举个例子来看,比如字符串"ababcbacadefegdehijhklij",我们可以将其划分为"ababcbaca","defegde","hijhklij"
+```
+将每个字母的首尾位置作为一个区间
+"a"的区间为[0,8], "b"的区间为[1,5], "c"的区间为[2,7], 
+"d"的区间为[4,9], "e"的区间为[5,10], "f"的区间为[6,6], 
+"g"的区间为[7,7], "h"的区间为[8,14], "i"的区间为[9,11], 
+"j"的区间为[10,12], "k"的区间为[11,11], "l"的区间为[12,15]
+--
+如何能够确定划分出来的每个字符串呢?
+由于a的区间为[0,8],b的区间为[1,5],c的区间为[2,7],所以保证统一字母出现在同一个区间内,最终结果为"ababcbaca".
+```
+
+* 在处理的过程中,利用keys记录了统计的字母,从而避免了对interval排序的操作
 
 ```python
-        
+class Solution:
+  def partitionLabels(self, s: str) -> List[int]:
+
+    # 统计首尾相同字母的最长区间长度
+    # 统计不重叠区间个数,即答案
+
+    interval = {}
+    keys = []
+
+    for i in range( len( s ) ):
+      if s[ i ] not in interval:
+        interval[ s[ i ] ] = [ -1, -1 ]
+        interval[ s[ i ] ][ 0 ] = i
+        keys.append( s[ i ] )
+      else:
+        interval[ s[ i ] ][ 1 ] = i
+
+    not_overlap = []
+    for key in keys:
+      val = interval[ key ]
+
+      if not not_overlap:
+        not_overlap.append( val )
+        continue
+
+      start, end = val[ 0 ], val[ 1 ]
+
+      if not_overlap[ -1 ][ 0 ] < start < not_overlap[ -1 ][ 1 ]:
+        not_overlap[ -1 ][ 1 ] = max( not_overlap[ -1 ][ 1 ], end )
+      else:
+        not_overlap.append( val )
+
+    ans = []
+    for start, end in not_overlap: ans.append( end == -1 and 1 or end - start + 1 )
+    return ans
 ```
