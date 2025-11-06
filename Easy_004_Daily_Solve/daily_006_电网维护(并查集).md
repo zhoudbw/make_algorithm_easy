@@ -267,3 +267,65 @@ class Solution:
         return ans
 ```
 
+和上述类似的做法:
+
+首先，建图 + DFS，把每个连通块中的节点加到各自的最小堆中。每个最小堆维护对应连通块的节点编号。
+
+然后处理询问。
+
+对于类型二，用一个 offline 布尔数组表示离线的电站。这一步不修改堆。
+
+对于类型一：
+
+如果电站 x 在线，那么答案为 x。
+否则检查 x 所处堆的堆顶是否在线。若离线，则弹出堆顶，重复该过程。如果堆为不空，那么答案为堆顶，否则为 −1。
+为了找到 x 所属的堆，还需要一个数组 belong 记录每个节点在哪个堆中。
+
+```python
+import heapq
+from typing import List
+
+
+class Solution:
+    def processQueries(self, c: int, connections: List[List[int]], queries: List[List[int]]) -> List[int]:
+
+        g = [ [] for _ in range( c + 1 ) ]
+
+        for x, y in connections:
+            g[ x ].append( y )
+            g[ y ].append( x )
+
+        # -- 记录元素所处的堆index --
+        belong = [ -1 for _ in range( c + 1 ) ]
+        heaps = []
+
+        def dfs( x_, h_ ):
+            belong[ x_ ] = len( heaps )
+            h_.append( x_ )
+            for y in g[ x_ ]:
+                if belong[ y ] < 0: dfs( y, h_ )
+
+        for i in range( 1, c + 1 ):
+            if belong[ i ] >= 0: continue
+
+            h = []
+            dfs( i, h )
+            heapq.heapify( h )
+            heaps.append( h )
+
+        offline = [ False for _ in range( c + 1 ) ]
+
+        ans = []
+        for op, x in queries:
+            if op == 2:
+                offline[ x ] = True
+                continue
+
+            if not offline[ x ]: ans.append( x )
+            else:
+                h = heaps[ belong[ x ] ]
+                while h and offline[ h[ 0 ] ]:
+                    heapq.heappop( h )
+                ans.append( h and h[ 0 ] or -1 )
+        return ans
+```
