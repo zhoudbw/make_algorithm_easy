@@ -1,7 +1,5 @@
---- Create Time: 2024-11-06 10:00:00
+--- Create Time: 2025-11-06 10:00:00
 --- @Author: xcyy
---- @Date: 2024-11-06 10:00:00
---- @Last Modified time: 2024-11-06 10:00:00
 
 # 并查集
 
