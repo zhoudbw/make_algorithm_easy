@@ -107,7 +107,7 @@ int find(int u) {
 
 图示:
 
-![路径压缩](Assets/dayily_006_path_compression.png)
+![路径压缩](Assets/daily_006_path_compression.png)
 
 ## 补充:按秩合并
 
