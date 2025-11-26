@@ -310,7 +310,8 @@ class Solution:
 - [2961. 双模幂运算](https://leetcode.cn/problems/double-modular-exponentiation/description/)
 - [2550. 猴子碰撞的方法数](https://leetcode.cn/problems/count-collisions-of-monkeys-on-a-polygon/description/)
 - [372. 超级次方](https://leetcode.cn/problems/super-pow/description/)
-
+- [1015. 可被 K 整除的最小整数](https://leetcode.cn/problems/smallest-integer-divisible-by-k/description/)
+- [2435. 矩阵中和能被 K 整除的路径](https://leetcode.cn/problems/paths-in-matrix-whose-sum-is-divisible-by-k/description/)
 
 
  
